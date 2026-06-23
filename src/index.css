@@ -1,0 +1,655 @@
+@import url('https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=Outfit:wght@300;400;500;600;700&display=swap');
+
+:root {
+  /* Temas de color: por defecto claro */
+  --font-sans: 'Outfit', sans-serif;
+  --font-serif: 'Merriweather', serif;
+
+  --transition-normal: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Tema Claro Premium */
+  --bg-primary: #f8f9fa;
+  --bg-card: #ffffff;
+  --text-main: #212529;
+  --text-muted: #6c757d;
+  --border-color: #dee2e6;
+  --accent-color: #4f46e5;
+  --accent-hover: #4338ca;
+  --accent-light: #e0e7ff;
+  --shadow-sm: 0 2px 4px rgba(0,0,0,0.02);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.05);
+  --shadow-lg: 0 10px 25px rgba(0,0,0,0.08);
+
+  /* Ajuste de lectura para Don Francisco */
+  --reader-line-height: 1.75;
+}
+
+[data-theme="sepia"] {
+  --bg-primary: #fdf6e3;
+  --bg-card: #f5eccb;
+  --text-main: #586e75;
+  --text-muted: #859900;
+  --border-color: #e5dcb9;
+  --accent-color: #b58900;
+  --accent-hover: #cb4b16;
+  --accent-light: #eee8d5;
+  --shadow-sm: 0 2px 4px rgba(88,110,117,0.03);
+  --shadow-md: 0 4px 12px rgba(88,110,117,0.06);
+  --shadow-lg: 0 10px 25px rgba(88,110,117,0.1);
+}
+
+[data-theme="dark"] {
+  /* Modo Iglesia - Alto Contraste Sin Brillo */
+  --bg-primary: #0f172a;
+  --bg-card: #1e293b;
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --border-color: #334155;
+  --accent-color: #6366f1;
+  --accent-hover: #818cf8;
+  --accent-light: #312e81;
+  --shadow-sm: 0 2px 4px rgba(0,0,0,0.2);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.3);
+  --shadow-lg: 0 10px 25px rgba(0,0,0,0.4);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--bg-primary);
+  color: var(--text-main);
+  transition: var(--transition-normal);
+  line-height: 1.5;
+  overflow-x: hidden;
+}
+
+/* Scrollbar estilizada */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-color);
+}
+
+/* Layout General */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  max-width: 600px; /* Ancho optimizado para móviles/tablets que use Don Francisco */
+  margin: 0 auto;
+  background-color: var(--bg-card);
+  box-shadow: var(--shadow-lg);
+  position: relative;
+  padding-bottom: 75px; /* Espacio para barra de navegación */
+}
+
+header {
+  padding: 1.25rem 1.5rem;
+  background-color: var(--bg-card);
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  transition: var(--transition-normal);
+}
+
+.header-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--accent-color), #818cf8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.header-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* Botones Premium */
+.btn-icon {
+  background: transparent;
+  border: none;
+  color: var(--text-main);
+  padding: 0.6rem;
+  border-radius: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition-normal);
+}
+
+.btn-icon:hover {
+  background-color: var(--bg-primary);
+  color: var(--accent-color);
+  transform: translateY(-1px);
+}
+
+.btn-icon:active {
+  transform: translateY(1px);
+}
+
+/* Pestañas de Navegación Inferior (Muy intuitivo para celular) */
+.nav-bar {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 600px;
+  height: 70px;
+  background-color: var(--bg-card);
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  z-index: 100;
+  box-shadow: 0 -4px 10px rgba(0,0,0,0.03);
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  font-weight: 500;
+  gap: 0.25rem;
+  flex: 1;
+  height: 100%;
+  transition: var(--transition-normal);
+}
+
+.nav-item:hover {
+  color: var(--text-main);
+}
+
+.nav-item.active {
+  color: var(--accent-color);
+}
+
+.nav-item.active svg {
+  transform: scale(1.1);
+  stroke-width: 2.5;
+}
+
+.nav-item svg {
+  transition: var(--transition-normal);
+}
+
+/* Área de contenido principal */
+.main-content {
+  padding: 1.5rem;
+  flex: 1;
+}
+
+/* Vista del Lector de Biblia */
+.reader-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.reader-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  border-bottom: 2px solid var(--border-color);
+  padding-bottom: 1rem;
+}
+
+.reader-navigation-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.reader-current-ref {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.reader-controls {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  background-color: var(--bg-primary);
+  padding: 0.25rem 0.5rem;
+  border-radius: 20px;
+}
+
+.text-container {
+  font-family: var(--font-serif);
+  color: var(--text-main);
+  transition: var(--transition-normal);
+  text-align: justify;
+}
+
+.verse-block {
+  margin-bottom: 1.25rem;
+  display: inline;
+  line-height: var(--reader-line-height);
+  cursor: pointer;
+  border-radius: 4px;
+  padding: 0.15rem 0.3rem;
+  transition: background-color 0.2s;
+}
+
+.verse-block:hover {
+  background-color: var(--accent-light);
+}
+
+.verse-block.selected {
+  background-color: rgba(79, 70, 229, 0.15);
+  border-left: 3px solid var(--accent-color);
+  padding-left: 0.4rem;
+}
+
+.verse-number {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 0.75em;
+  color: var(--accent-color);
+  vertical-align: super;
+  margin-right: 0.35rem;
+  user-select: none;
+}
+
+/* Selector Visual de Libros y Capítulos */
+.selector-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--text-muted);
+}
+
+.selector-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.selector-card {
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 1rem 0.5rem;
+  text-align: center;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: var(--transition-normal);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 80px;
+}
+
+.selector-card:hover {
+  border-color: var(--accent-color);
+  background-color: var(--bg-card);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.selector-card.active {
+  background-color: var(--accent-color);
+  color: #ffffff;
+  border-color: var(--accent-color);
+}
+
+/* Grid para Capítulos (Botones Cuadrados Grandes) */
+.chapters-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.5rem;
+}
+
+.chapter-btn {
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  height: 50px;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text-main);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition-normal);
+}
+
+.chapter-btn:hover {
+  background-color: var(--accent-light);
+  border-color: var(--accent-color);
+  color: var(--accent-color);
+}
+
+.chapter-btn.active {
+  background-color: var(--accent-color);
+  color: #ffffff;
+  border-color: var(--accent-color);
+}
+
+/* Buscador */
+.search-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.search-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-input {
+  width: 100%;
+  padding: 1.1rem 1rem 1.1rem 3rem;
+  font-size: 1.1rem;
+  font-family: var(--font-sans);
+  border-radius: 16px;
+  border: 2px solid var(--border-color);
+  background-color: var(--bg-primary);
+  color: var(--text-main);
+  outline: none;
+  transition: var(--transition-normal);
+}
+
+.search-input:focus {
+  border-color: var(--accent-color);
+  background-color: var(--bg-card);
+  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+}
+
+.search-icon-inside {
+  position: absolute;
+  left: 1.2rem;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.results-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.result-card {
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 1.25rem;
+  cursor: pointer;
+  transition: var(--transition-normal);
+}
+
+.result-card:hover {
+  border-color: var(--accent-color);
+  background-color: var(--bg-card);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.result-ref {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--accent-color);
+  margin-bottom: 0.5rem;
+  display: flex;
+  justify-content: space-between;
+}
+
+.result-text {
+  font-family: var(--font-serif);
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--text-main);
+}
+
+/* Modales y Paneles Flotantes (Notas/Ajustes) */
+.drawer {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%) translateY(100%);
+  width: 100%;
+  max-width: 600px;
+  background-color: var(--bg-card);
+  border-top-left-radius: 24px;
+  border-top-right-radius: 24px;
+  box-shadow: 0 -10px 30px rgba(0,0,0,0.15);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1000;
+  padding: 1.5rem;
+}
+
+.drawer.open {
+  transform: translateX(-50%) translateY(0);
+}
+
+.drawer-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0,0,0,0.4);
+  z-index: 999;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.drawer-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.drawer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+}
+
+.drawer-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+/* Filtros por Testamento */
+.tabs-container {
+  display: flex;
+  background-color: var(--bg-primary);
+  padding: 0.3rem;
+  border-radius: 12px;
+  margin-bottom: 1rem;
+}
+
+.tab-btn {
+  flex: 1;
+  border: none;
+  background: none;
+  padding: 0.6rem;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: var(--transition-normal);
+}
+
+.tab-btn.active {
+  background-color: var(--bg-card);
+  color: var(--accent-color);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Historial y Favoritos vacíos */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1.5rem;
+  text-align: center;
+  color: var(--text-muted);
+  gap: 1rem;
+}
+
+.empty-state svg {
+  color: var(--border-color);
+}
+
+/* Botones de acción rápida */
+.quick-action-bar {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.btn-primary {
+  background-color: var(--accent-color);
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  padding: 0.8rem 1.5rem;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: var(--transition-normal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.btn-primary:hover {
+  background-color: var(--accent-hover);
+}
+
+.btn-secondary {
+  background-color: var(--bg-primary);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 0.8rem 1.5rem;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: var(--transition-normal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn-secondary:hover {
+  background-color: var(--border-color);
+}
+
+/* Nota de Versículo */
+.verse-note-area {
+  width: 100%;
+  min-height: 100px;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-primary);
+  color: var(--text-main);
+  padding: 0.75rem;
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  outline: none;
+  resize: vertical;
+  margin-bottom: 1rem;
+}
+
+.verse-note-area:focus {
+  border-color: var(--accent-color);
+  background-color: var(--bg-card);
+}
+
+/* Estilos de Ajuste de Letra */
+.font-size-control {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.theme-selector {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.theme-btn {
+  flex: 1;
+  height: 50px;
+  border-radius: 12px;
+  border: 2px solid var(--border-color);
+  cursor: pointer;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: var(--transition-normal);
+}
+
+.theme-btn.active {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+}
+
+.theme-btn-light {
+  background-color: #ffffff;
+  color: #212529;
+}
+.theme-btn-sepia {
+  background-color: #fdf6e3;
+  color: #586e75;
+}
+.theme-btn-dark {
+  background-color: #0f172a;
+  color: #f8fafc;
+}
