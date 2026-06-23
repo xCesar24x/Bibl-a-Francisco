@@ -22,15 +22,16 @@ export default function BibleReader({
   favorites, 
   onToggleFavorite, 
   notes, 
-  onSaveNote 
+  onSaveNote,
+  globalFontSize = 20,
+  globalVoiceRate = 0.92,
 }) {
-  const [fontSize, setFontSize] = useState(20); // Tamaño inicial grande para Don Francisco
   const [selectedVerse, setSelectedVerse] = useState(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [copied, setCopied] = useState(false);
   const [noteText, setNoteText] = useState('');
-  
+
   const synthRef = useRef(window.speechSynthesis);
   const utteranceRef = useRef(null);
   const voicesRef = useRef([]); // Cache de voces disponibles
@@ -73,20 +74,6 @@ export default function BibleReader({
       es.find(v => v.lang.toLowerCase().includes('es-es')) ||
       es[0]
     );
-  };
-
-  // Cargar tamaño de letra desde localStorage si existe
-  useEffect(() => {
-    const savedSize = localStorage.getItem('bible-fontsize');
-    if (savedSize) {
-      setFontSize(parseInt(savedSize));
-    }
-  }, []);
-
-  const changeFontSize = (delta) => {
-    const newSize = Math.max(16, Math.min(36, fontSize + delta));
-    setFontSize(newSize);
-    localStorage.setItem('bible-fontsize', newSize.toString());
   };
 
   const bookObj = bibleData[book.key];
@@ -155,7 +142,7 @@ export default function BibleReader({
     const doSpeak = () => {
       const utterance = new SpeechSynthesisUtterance(textToSpeak);
       utterance.lang = 'es-MX';
-      utterance.rate = 0.92;
+      utterance.rate = globalVoiceRate;
       utterance.pitch = 1.0;
 
       const bestVoice = getBestSpanishVoice();
@@ -257,7 +244,7 @@ export default function BibleReader({
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.5rem' }}>
-          {/* Controles de Voz */}
+        {/* Controles de Voz */}
           <button 
             className="btn-secondary" 
             onClick={handlePlayChapter} 
@@ -266,24 +253,13 @@ export default function BibleReader({
             {isPlaying ? <VolumeX size={20} /> : <Volume2 size={20} />}
             <span>{isPlaying ? 'Detener voz' : 'Escuchar capítulo'}</span>
           </button>
-
-          {/* Ajuste de Tamaño de Letra */}
-          <div className="reader-controls">
-            <button className="btn-icon" onClick={() => changeFontSize(-2)} style={{ padding: '0.4rem' }}>
-              <Minus size={18} />
-            </button>
-            <span style={{ fontSize: '0.9rem', fontWeight: 600, padding: '0 0.5rem' }}>A A</span>
-            <button className="btn-icon" onClick={() => changeFontSize(2)} style={{ padding: '0.4rem' }}>
-              <Plus size={18} />
-            </button>
-          </div>
         </div>
       </div>
 
       {/* Cuerpo del Texto */}
       <div 
         className="text-container" 
-        style={{ fontSize: `${fontSize}px`, lineHeight: 1.8 }}
+        style={{ fontSize: `${globalFontSize}px`, lineHeight: 1.8 }}
       >
         {verses.map((verse) => (
           <span 

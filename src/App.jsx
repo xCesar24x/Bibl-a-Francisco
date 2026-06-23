@@ -1,18 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  BookOpen, 
-  Search, 
-  Bookmark, 
-  Settings, 
-  Sun, 
-  Moon, 
-  BookOpenCheck,
-  Award
-} from 'lucide-react';
+import { BookOpen, Search, Bookmark, Settings, BookOpenCheck, Award } from 'lucide-react';
 import BibleSelector from './components/BibleSelector';
 import BibleReader from './components/BibleReader';
 import BibleSearch from './components/BibleSearch';
 import FavoritesList from './components/FavoritesList';
+import SettingsModal from './components/SettingsModal';
 import portadaImg from './assets/portada.jpg';
 
 // Una lista de versículos hermosos para mostrar como "Versículo del Día"
@@ -28,11 +20,13 @@ const keyVerses = [
 ];
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('selector'); // selector, reader, search, favorites
-  const [theme, setTheme] = useState('light'); // light, sepia, dark
+  const [activeTab, setActiveTab] = useState('selector');
+  const [theme, setTheme] = useState('light');
   const [currentBook, setCurrentBook] = useState({ name: 'Génesis', key: 'Génesis', testament: 'Antiguo' });
   const [currentChapter, setCurrentChapter] = useState(1);
-  
+  const [fontSize, setFontSize] = useState(20);
+  const [voiceRate, setVoiceRate] = useState(0.92);
+
   const [favorites, setFavorites] = useState([]);
   const [notes, setNotes] = useState({});
   const [history, setHistory] = useState([]);
@@ -41,24 +35,25 @@ export default function App() {
 
   // Cargar estado inicial desde localStorage
   useEffect(() => {
-    // Cargar Tema
     const savedTheme = localStorage.getItem('bible-theme') || 'light';
     setTheme(savedTheme);
     document.documentElement.setAttribute('data-theme', savedTheme);
 
-    // Cargar Favoritos
+    const savedFontSize = localStorage.getItem('bible-fontsize');
+    if (savedFontSize) setFontSize(parseInt(savedFontSize));
+
+    const savedVoiceRate = localStorage.getItem('bible-voicerate');
+    if (savedVoiceRate) setVoiceRate(parseFloat(savedVoiceRate));
+
     const savedFavs = localStorage.getItem('bible-favorites');
     if (savedFavs) setFavorites(JSON.parse(savedFavs));
 
-    // Cargar Notas
     const savedNotes = localStorage.getItem('bible-notes');
     if (savedNotes) setNotes(JSON.parse(savedNotes));
 
-    // Cargar Historial
     const savedHistory = localStorage.getItem('bible-history');
     if (savedHistory) setHistory(JSON.parse(savedHistory));
 
-    // Cargar Libro y Capítulo actual
     const savedCurrent = localStorage.getItem('bible-current-read');
     if (savedCurrent) {
       const { book, chapter } = JSON.parse(savedCurrent);
@@ -66,17 +61,24 @@ export default function App() {
       setCurrentChapter(chapter);
     }
 
-    // Calcular Versículo del Día basado en la fecha actual
     const dayOfYear = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
-    const index = dayOfYear % keyVerses.length;
-    setVerseOfDay(keyVerses[index]);
+    setVerseOfDay(keyVerses[dayOfYear % keyVerses.length]);
   }, []);
 
-  // Cambiar y guardar Tema
   const handleThemeChange = (newTheme) => {
     setTheme(newTheme);
     document.documentElement.setAttribute('data-theme', newTheme);
     localStorage.setItem('bible-theme', newTheme);
+  };
+
+  const handleFontSize = (size) => {
+    setFontSize(size);
+    localStorage.setItem('bible-fontsize', size.toString());
+  };
+
+  const handleVoiceRate = (rate) => {
+    setVoiceRate(rate);
+    localStorage.setItem('bible-voicerate', rate.toString());
   };
 
   // Guardar/Quitar favoritos
@@ -251,6 +253,8 @@ export default function App() {
             onToggleFavorite={toggleFavorite}
             notes={notes}
             onSaveNote={saveNote}
+            globalFontSize={fontSize}
+            globalVoiceRate={voiceRate}
           />
         )}
 
@@ -305,51 +309,17 @@ export default function App() {
         </button>
       </nav>
 
-      {/* Drawer de Ajustes */}
-      <div className={`drawer-overlay ${isSettingsOpen ? 'open' : ''}`} onClick={() => setIsSettingsOpen(false)}></div>
-      <div className={`drawer ${isSettingsOpen ? 'open' : ''}`}>
-        <div className="drawer-header">
-          <div className="drawer-title">Ajustes de la Aplicación</div>
-          <button className="btn-secondary" onClick={() => setIsSettingsOpen(false)}>Cerrar</button>
-        </div>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-          <div>
-            <label style={{ fontWeight: 600, fontSize: '1rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.5rem' }}>
-              Tema Visual:
-            </label>
-            <div className="theme-selector">
-              <button 
-                className={`theme-btn theme-btn-light ${theme === 'light' ? 'active' : ''}`}
-                onClick={() => handleThemeChange('light')}
-              >
-                <Sun size={18} />
-                Claro
-              </button>
-              <button 
-                className={`theme-btn theme-btn-sepia ${theme === 'sepia' ? 'active' : ''}`}
-                onClick={() => handleThemeChange('sepia')}
-              >
-                Cálido
-              </button>
-              <button 
-                className={`theme-btn theme-btn-dark ${theme === 'dark' ? 'active' : ''}`}
-                onClick={() => handleThemeChange('dark')}
-              >
-                <Moon size={18} />
-                Iglesia
-              </button>
-            </div>
-          </div>
-
-          <div style={{ marginTop: '0.5rem', borderTop: '1px solid var(--border-color)', paddingTop: '1rem' }}>
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', textAlign: 'center' }}>
-              Diseñado con cariño para Don Francisco.<br />
-              Esta Biblia funciona 100% sin internet.
-            </p>
-          </div>
-        </div>
-      </div>
+      {/* Modal de Ajustes Premium */}
+      <SettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        theme={theme}
+        onTheme={handleThemeChange}
+        fontSize={fontSize}
+        onFontSize={handleFontSize}
+        voiceRate={voiceRate}
+        onVoiceRate={handleVoiceRate}
+      />
     </div>
   );
 }
