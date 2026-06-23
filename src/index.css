@@ -70,6 +70,7 @@ body {
   background: var(--bg-body, linear-gradient(160deg, #e8eaf8 0%, #dde4f5 35%, #eceaf8 70%, #e4e8f5 100%));
   background-attachment: fixed;
   min-height: 100vh;
+  min-height: 100dvh;
   color: var(--text-main);
   transition: background 0.4s ease, color 0.25s ease;
   line-height: 1.5;
@@ -96,6 +97,7 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  min-height: 100dvh;
   max-width: 600px;
   margin: 0 auto;
   /* Fondo semi-transparente con glassmorphism */
@@ -104,11 +106,11 @@ body {
   -webkit-backdrop-filter: var(--glass-blur, blur(12px));
   box-shadow: 0 0 0 1px rgba(99,102,241,0.08), var(--shadow-lg);
   position: relative;
-  padding-bottom: 75px;
+  padding-bottom: calc(75px + env(safe-area-inset-bottom, 0px));
 }
 
 header {
-  padding: 1.25rem 1.5rem;
+  padding: calc(1.25rem + env(safe-area-inset-top, 0px)) 1.5rem 1.25rem 1.5rem;
   /* Glass header translúcido */
   background: rgba(255, 255, 255, 0.72);
   backdrop-filter: blur(16px);
@@ -180,7 +182,8 @@ header {
   transform: translateX(-50%);
   width: 100%;
   max-width: 600px;
-  height: 70px;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  height: calc(70px + env(safe-area-inset-bottom, 0px));
   background: rgba(255, 255, 255, 0.88);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
@@ -532,6 +535,7 @@ header {
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 1000;
   padding: 1.5rem;
+  padding-bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px));
 }
 
 .drawer.open {
