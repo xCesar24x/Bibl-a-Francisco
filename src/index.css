@@ -100,11 +100,9 @@ body {
   min-height: 100dvh;
   max-width: 600px;
   margin: 0 auto;
-  /* Fondo semi-transparente con glassmorphism */
-  background: linear-gradient(180deg, rgba(255,255,255,0.75) 0%, rgba(240,243,255,0.65) 100%);
-  backdrop-filter: var(--glass-blur, blur(12px));
-  -webkit-backdrop-filter: var(--glass-blur, blur(12px));
-  box-shadow: 0 0 0 1px rgba(99,102,241,0.08), var(--shadow-lg);
+  /* Fondo semi-transparente */
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.08), var(--shadow-lg);
   position: relative;
   padding-bottom: calc(75px + env(safe-area-inset-bottom, 0px));
 }
