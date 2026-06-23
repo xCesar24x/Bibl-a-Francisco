@@ -13,6 +13,7 @@ import BibleSelector from './components/BibleSelector';
 import BibleReader from './components/BibleReader';
 import BibleSearch from './components/BibleSearch';
 import FavoritesList from './components/FavoritesList';
+import portadaImg from './assets/portada.jpg';
 
 // Una lista de versículos hermosos para mostrar como "Versículo del Día"
 const keyVerses = [
@@ -203,7 +204,9 @@ export default function App() {
           <div 
             className="result-card" 
             style={{ 
-              background: 'linear-gradient(135deg, var(--accent-color), #818cf8)', 
+              background: `linear-gradient(135deg, rgba(79, 70, 229, 0.85), rgba(17, 24, 39, 0.9)), url(${portadaImg})`, 
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
               color: '#ffffff',
               border: 'none',
               marginBottom: '1.5rem',
