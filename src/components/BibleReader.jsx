@@ -33,6 +33,47 @@ export default function BibleReader({
   
   const synthRef = useRef(window.speechSynthesis);
   const utteranceRef = useRef(null);
+  const voicesRef = useRef([]); // Cache de voces disponibles
+
+  // Pre-cargar voces en cuanto el componente monta
+  // getVoices() es asíncrono en Chrome/Safari — hay que esperar onvoiceschanged
+  useEffect(() => {
+    const loadVoices = () => {
+      const available = window.speechSynthesis.getVoices();
+      if (available.length > 0) {
+        voicesRef.current = available;
+      }
+    };
+
+    // Intento inmediato (funciona en Firefox)
+    loadVoices();
+
+    // Suscripción al evento para Chrome/Edge/Safari
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+
+    return () => {
+      window.speechSynthesis.onvoiceschanged = null;
+    };
+  }, []);
+
+  // Seleccionar la mejor voz en español disponible
+  const getBestSpanishVoice = () => {
+    const voices = voicesRef.current.length > 0
+      ? voicesRef.current
+      : window.speechSynthesis.getVoices(); // fallback por si acaso
+
+    const es = voices.filter(v => v.lang.toLowerCase().replace('_', '-').startsWith('es'));
+    if (es.length === 0) return null;
+
+    return (
+      es.find(v => v.name.toLowerCase().includes('natural') || v.name.toLowerCase().includes('neural')) ||
+      es.find(v => v.name.toLowerCase().includes('google')) ||
+      es.find(v => v.name.toLowerCase().includes('paulina') || v.name.toLowerCase().includes('sabina') || v.name.toLowerCase().includes('helena') || v.name.toLowerCase().includes('mónica')) ||
+      es.find(v => v.lang.toLowerCase().includes('mx')) ||
+      es.find(v => v.lang.toLowerCase().includes('es-es')) ||
+      es[0]
+    );
+  };
 
   // Cargar tamaño de letra desde localStorage si existe
   useEffect(() => {
@@ -98,60 +139,64 @@ export default function BibleReader({
     setTimeout(() => setCopied(false), 2000);
   };
 
-  // Text-To-Speech (Voz alta)
+  // Text-To-Speech (Voz alta) — con carga correcta de voces
   const speakText = (textToSpeak) => {
-    if (!synthRef.current) return;
-    
+    const synth = window.speechSynthesis;
+    if (!synth) return;
+
     if (isPlaying) {
-      stopAudio();
+      synth.cancel();
+      setIsPlaying(false);
       return;
     }
 
-    // Detener cualquier reproducción previa
-    synthRef.current.cancel();
+    synth.cancel();
 
-    utteranceRef.current = new SpeechSynthesisUtterance(textToSpeak);
-    utteranceRef.current.lang = 'es-MX'; // Usar español por defecto
-    
-    // Buscar una voz en español más natural/premium
-    const voices = synthRef.current.getVoices();
-    const spanishVoices = voices.filter(v => v.lang.toLowerCase().replace('_', '-').startsWith('es'));
-    
-    // Prioridad de calidad de voz:
-    // 1. Voces "natural" o "neural"
-    // 2. Voces de Google
-    // 3. Voces de Microsoft (ej. Sabina, Helena, Paulina)
-    // 4. Cualquiera de México o España
-    const premiumVoice = spanishVoices.find(v => v.name.toLowerCase().includes('natural') || v.name.toLowerCase().includes('neural'))
-      || spanishVoices.find(v => v.name.toLowerCase().includes('google'))
-      || spanishVoices.find(v => v.name.toLowerCase().includes('sabina') || v.name.toLowerCase().includes('helena') || v.name.toLowerCase().includes('paulina'))
-      || spanishVoices.find(v => v.lang.toLowerCase().includes('mx'))
-      || spanishVoices.find(v => v.lang.toLowerCase().includes('es'))
-      || spanishVoices[0];
-      
-    if (premiumVoice) {
-      utteranceRef.current.voice = premiumVoice;
-      // Ajustar ligeramente el tono y la velocidad para que sea más agradable a un señor mayor
-      utteranceRef.current.rate = 0.95; // Un poco más pausado y claro
-      utteranceRef.current.pitch = 1.0;
+    const doSpeak = () => {
+      const utterance = new SpeechSynthesisUtterance(textToSpeak);
+      utterance.lang = 'es-MX';
+      utterance.rate = 0.92;
+      utterance.pitch = 1.0;
+
+      const bestVoice = getBestSpanishVoice();
+      if (bestVoice) {
+        utterance.voice = bestVoice;
+      }
+
+      utterance.onend = () => setIsPlaying(false);
+      utterance.onerror = (e) => {
+        console.warn('TTS error:', e.error);
+        setIsPlaying(false);
+      };
+
+      utteranceRef.current = utterance;
+      setIsPlaying(true);
+      synth.speak(utterance);
+    };
+
+    // Si las voces ya están cargadas, hablar de inmediato
+    // Si no, esperar a que se carguen (Chrome/Safari necesitan esto)
+    if (voicesRef.current.length > 0) {
+      doSpeak();
+    } else {
+      const waitAndSpeak = () => {
+        const loaded = synth.getVoices();
+        if (loaded.length > 0) {
+          voicesRef.current = loaded;
+        }
+        doSpeak();
+        synth.onvoiceschanged = null;
+      };
+      synth.onvoiceschanged = waitAndSpeak;
+      // Timeout de seguridad: hablar aunque no haya voces premium
+      setTimeout(() => {
+        if (!isPlaying) doSpeak();
+      }, 600);
     }
-    
-    utteranceRef.current.onend = () => {
-      setIsPlaying(false);
-    };
-
-    utteranceRef.current.onerror = () => {
-      setIsPlaying(false);
-    };
-
-    setIsPlaying(true);
-    synthRef.current.speak(utteranceRef.current);
   };
 
   const stopAudio = () => {
-    if (synthRef.current) {
-      synthRef.current.cancel();
-    }
+    window.speechSynthesis.cancel();
     setIsPlaying(false);
   };
 
