@@ -111,7 +111,30 @@ export default function BibleReader({
     synthRef.current.cancel();
 
     utteranceRef.current = new SpeechSynthesisUtterance(textToSpeak);
-    utteranceRef.current.lang = 'es-MX'; // Usar español latino o de España por defecto
+    utteranceRef.current.lang = 'es-MX'; // Usar español por defecto
+    
+    // Buscar una voz en español más natural/premium
+    const voices = synthRef.current.getVoices();
+    const spanishVoices = voices.filter(v => v.lang.toLowerCase().replace('_', '-').startsWith('es'));
+    
+    // Prioridad de calidad de voz:
+    // 1. Voces "natural" o "neural"
+    // 2. Voces de Google
+    // 3. Voces de Microsoft (ej. Sabina, Helena, Paulina)
+    // 4. Cualquiera de México o España
+    const premiumVoice = spanishVoices.find(v => v.name.toLowerCase().includes('natural') || v.name.toLowerCase().includes('neural'))
+      || spanishVoices.find(v => v.name.toLowerCase().includes('google'))
+      || spanishVoices.find(v => v.name.toLowerCase().includes('sabina') || v.name.toLowerCase().includes('helena') || v.name.toLowerCase().includes('paulina'))
+      || spanishVoices.find(v => v.lang.toLowerCase().includes('mx'))
+      || spanishVoices.find(v => v.lang.toLowerCase().includes('es'))
+      || spanishVoices[0];
+      
+    if (premiumVoice) {
+      utteranceRef.current.voice = premiumVoice;
+      // Ajustar ligeramente el tono y la velocidad para que sea más agradable a un señor mayor
+      utteranceRef.current.rate = 0.95; // Un poco más pausado y claro
+      utteranceRef.current.pitch = 1.0;
+    }
     
     utteranceRef.current.onend = () => {
       setIsPlaying(false);
