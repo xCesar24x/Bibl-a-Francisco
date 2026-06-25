@@ -6,6 +6,7 @@ import { BookOpen, Search, ArrowRight } from 'lucide-react';
 export default function BibleSelector({ onSelectChapter }) {
   const [activeTestament, setActiveTestament] = useState('Antiguo');
   const [selectedBook, setSelectedBook] = useState(null);
+  const [selectedChapter, setSelectedChapter] = useState(null);
   const [searchVal, setSearchVal] = useState('');
 
   // Obtener la cantidad de capítulos de un libro en el JSON
@@ -13,6 +14,15 @@ export default function BibleSelector({ onSelectChapter }) {
     const bookObj = bibleData[bookKey];
     if (!bookObj) return 0;
     return Object.keys(bookObj).filter(k => !isNaN(k)).length;
+  };
+
+  // Obtener la cantidad de versículos de un capítulo en el JSON
+  const getVerseCount = (bookKey, chapterNum) => {
+    const bookObj = bibleData[bookKey];
+    if (!bookObj) return 0;
+    const chapterObj = bookObj[chapterNum.toString()];
+    if (!chapterObj) return 0;
+    return Object.keys(chapterObj).filter(k => !isNaN(k)).length;
   };
 
   // Normalizar texto para búsquedas sin acentos
@@ -25,13 +35,12 @@ export default function BibleSelector({ onSelectChapter }) {
 
   const handleBookClick = (book) => {
     setSelectedBook(book);
+    setSelectedChapter(null);
     setSearchVal(''); // Limpiar búsqueda al entrar al libro
   };
 
   const handleChapterClick = (chapterNum) => {
-    onSelectChapter(selectedBook, parseInt(chapterNum));
-    setSelectedBook(null);
-    setSearchVal('');
+    setSelectedChapter(parseInt(chapterNum));
   };
 
   // Generar sugerencias dinámicas según el texto escrito
@@ -120,23 +129,12 @@ export default function BibleSelector({ onSelectChapter }) {
   const handleSuggestionClick = (sug) => {
     if (sug.type === 'book') {
       setSelectedBook(sug.book);
+      setSelectedChapter(null);
     } else if (sug.type === 'chapter') {
       onSelectChapter(sug.book, sug.chapter);
     } else if (sug.type === 'verse') {
       // Usar selector de versículo directamente (provoca scroll al versículo)
-      onSelectChapter(sug.book, sug.chapter);
-      // Guardar en localStorage para que el lector haga scroll
-      setTimeout(() => {
-        const elements = document.getElementsByClassName('verse-block');
-        for (let el of elements) {
-          const vNumSpan = el.querySelector('.verse-number');
-          if (vNumSpan && vNumSpan.textContent === sug.verse.toString()) {
-            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            el.click();
-            break;
-          }
-        }
-      }, 300);
+      onSelectChapter(sug.book, sug.chapter, parseInt(sug.verse));
     }
     setSearchVal('');
   };
@@ -269,7 +267,7 @@ export default function BibleSelector({ onSelectChapter }) {
             </div>
           )}
         </div>
-      ) : (
+      ) : !selectedChapter ? (
         // Pantalla de Selección de Capítulo
         <div>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
@@ -288,6 +286,48 @@ export default function BibleSelector({ onSelectChapter }) {
                 onClick={() => handleChapterClick(chapterNum)}
               >
                 {chapterNum}
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : (
+        // Pantalla de Selección de Versículo
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
+            <h2 style={{ fontSize: '1.5rem', fontWeight: 700 }}>{selectedBook.name} {selectedChapter}</h2>
+            <button className="btn-secondary" onClick={() => setSelectedChapter(null)} style={{ padding: '0.5rem 1rem' }}>
+              Atrás a Capítulos
+            </button>
+          </div>
+
+          <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
+            <button 
+              className="btn-primary" 
+              onClick={() => {
+                onSelectChapter(selectedBook, selectedChapter);
+                setSelectedBook(null);
+                setSelectedChapter(null);
+              }}
+              style={{ flex: 1, padding: '0.9rem', fontSize: '1.05rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }}
+            >
+              <BookOpen size={20} />
+              <span>Leer Capítulo Completo</span>
+            </button>
+          </div>
+
+          <h3 className="selector-title">Selecciona un Versículo (Opcional):</h3>
+          <div className="chapters-grid">
+            {Array.from({ length: getVerseCount(selectedBook.key, selectedChapter) }, (_, i) => i + 1).map((verseNum) => (
+              <button
+                key={verseNum}
+                className="chapter-btn"
+                onClick={() => {
+                  onSelectChapter(selectedBook, selectedChapter, verseNum);
+                  setSelectedBook(null);
+                  setSelectedChapter(null);
+                }}
+              >
+                {verseNum}
               </button>
             ))}
           </div>

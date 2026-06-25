@@ -148,12 +148,26 @@ export default function App() {
   };
 
   // Al seleccionar un capítulo desde el menú
-  const handleSelectChapter = (book, chapter) => {
+  const handleSelectChapter = (book, chapter, verseNumber = null) => {
     setCurrentBook(book);
     setCurrentChapter(chapter);
     addToHistory(book, chapter);
     localStorage.setItem('bible-current-read', JSON.stringify({ book, chapter }));
     setActiveTab('reader');
+
+    if (verseNumber) {
+      setTimeout(() => {
+        const elements = document.getElementsByClassName('verse-block');
+        for (let el of elements) {
+          const vNumSpan = el.querySelector('.verse-number');
+          if (vNumSpan && vNumSpan.textContent === verseNumber.toString()) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            el.click(); // Abrir el drawer de notas/favoritos automáticamente
+            break;
+          }
+        }
+      }, 250);
+    }
   };
 
   // Al seleccionar un versículo desde búsqueda/favoritos
